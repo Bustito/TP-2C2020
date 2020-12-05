@@ -26,7 +26,7 @@
 /*********************************************************************************
  * Es la estructura que permite crear la lista y tiene el siguiente formato      *
  *                                                                               *
- *  [palabra en espaÃƒÂ±ol] [palabra en ingles] [cantidad de busquedas]             *
+ *  [palabra en espa�ol] [palabra en ingles] [cantidad de busquedas]             *
  *                                                                               *
  *********************************************************************************/
 typedef struct diccionario{
@@ -87,7 +87,7 @@ void FINALIZAR(diccionario listado[], int puntero){
  * Funcion BUSCAR(palabra, listado, puntero, idioma)                             *
  *                                                                               *
  *  Busca la palabra en funcion del idioma de esta. De manera secuencial si      *
- *  es ingles, y dicotomica si es en espaÃƒÂ±ol. Devuelve la posicion de la         *
+ *  es ingles, y dicotomica si es en espa�ol. Devuelve la posicion de la         *
  *  palabra buscada.                                                             *
  *                                                                               *
  *********************************************************************************/
@@ -253,7 +253,7 @@ int AGREGAR(char palabra[], diccionario listado[], int puntero, short idioma){
  *                                                                               *
  *  Dada una palabra y el idioma de esta, busca su posicion dentro de la         *
  *  lista y luego muestra su traduccion, en caso de que no se encuentre          *
- *  y el usuario quiera aÃƒÂ±adirla, llama a la funcion AGREGAR. Devuelve la        *
+ *  y el usuario quiera a�adirla, llama a la funcion AGREGAR. Devuelve la        *
  *  posicion de la ultima palabra en la lista.                                   *
  *                                                                               *
  *********************************************************************************/
@@ -371,8 +371,8 @@ short SUBMENU(diccionario listado[], int puntero, short idioma){
 /*********************************************************************************
  * Subrutina MENU(listado, puntero)                                              *
  *                                                                               *
- *  Genera el menu principal, con las opciones,traducir del ingles al espaÃƒÂ±ol    *
- *  traducir del espaÃƒÂ±ol al ingles y la opcion volver.                           *
+ *  Genera el menu principal, con las opciones,traducir del ingles al espa�ol    *
+ *  traducir del espa�ol al ingles y la opcion volver.                           *
  *                                                                               *
  *********************************************************************************/
 short MENU(diccionario listado[], int puntero){
@@ -386,12 +386,12 @@ short MENU(diccionario listado[], int puntero){
     }
     switch (seleccion){
     case 1:
-        while(SUBMENU(listado, puntero, INGLES));//Ingles a espaÃƒÂ±ol//
+        while(SUBMENU(listado, puntero, INGLES));//Ingles a espa�ol//
         flag = 1;
         break;
     
     case 2:
-        while(SUBMENU(listado, puntero, ESPANOL));//EspaÃƒÂ±ol a ingles//
+        while(SUBMENU(listado, puntero, ESPANOL));//Espa�ol a ingles//
         flag = 1;
         break;
 

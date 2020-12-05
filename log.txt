@@ -21,4 +21,3 @@
 
 	Problemas:
 		Necesitamos modificar la funcion traducir para que muestre multiples traducciones
-		Necesitamos ver el problema con los acentos
