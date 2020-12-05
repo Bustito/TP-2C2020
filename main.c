@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include "subrutinas.h"
 
+
 int main (void){
     int puntero;
     puntero = INICIAR(listado);
