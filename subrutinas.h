@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-
+#include <locale.h>
 
 //DEFINICIONES********************************************************************
 
@@ -49,18 +49,16 @@ diccionario listado[LONGITUD_LISTA];
  *                                                                               *
  *********************************************************************************/
 int INICIAR(diccionario listado[]){
+    setlocale(LC_ALL, "");
     int puntero = 0;
     FILE *diccionario;
     diccionario = fopen("espaingl.dat","r");
+
     while (!feof(diccionario)){
-        fscanf(diccionario, "%s %s %d", listado[puntero].espanol, listado[puntero].ingles, &listado[puntero].cant_busquedas);
-
-        //Formateo las mayus
-        listado[puntero].espanol[0] = toupper(listado[puntero].espanol[0]);
-        listado[puntero].ingles[0] = toupper(listado[puntero].ingles[0]);
-
+        fscanf(diccionario, "%s\t%s\t%d", listado[puntero].espanol, listado[puntero].ingles, &listado[puntero].cant_busquedas);
         puntero++;
     }
+
     fclose(diccionario);
     return puntero;
 };
@@ -73,7 +71,7 @@ int INICIAR(diccionario listado[]){
  *  archivo.                                                                     *
  *                                                                               *
  *********************************************************************************/
-void FINALIZAR(diccionario listado[], int puntero){ 
+void FINALIZAR(diccionario listado[], int puntero){
     FILE *diccionario;
     diccionario = fopen("espaingl.dat","w");
     for (int i = 0; i<(puntero-1); i++){
@@ -131,7 +129,7 @@ int BUSCAR(char palabra[], diccionario listado[], int puntero, short idioma){
             posicion = -1;
         }
     }
-    return posicion;  
+    return posicion;
 };
 
 
@@ -150,6 +148,7 @@ void ORDENAR_ALFABETICAMENTE(diccionario listado[], int puntero){
         j = i-1;
         flag = 1;
         while (flag && j>=0){
+
             if (strcmp(aux.espanol, listado[j].espanol)<0){
                 listado[j+1] = listado[j];
                 j--;
@@ -206,45 +205,52 @@ void MAS_BUSCADAS(diccionario listado[], int puntero){
 int AGREGAR(char palabra[], diccionario listado[], int puntero, short idioma){
     char traduccion[LONGITUD_PALABRA];
     char seleccion = 'N';
-    if(puntero<LONGITUD_LISTA){
+    if(puntero<LONGITUD_LISTA && BUSCAR(palabra, listado, puntero, idioma)<0){
         while (seleccion == 'N'){
             if (idioma == ESPANOL){
-                printf("Ingresar la traduccion al ingles\n");
+                printf("Ingresar la traduccion al ingles\n ");
             }else{
-                printf("Ingresar la traduccion al espaÃ±ol\n");
+                printf("Ingresar la traduccion al español\n ");
             }
-            
+            fflush(stdin);
             gets(traduccion);
-            
-            printf("Â¿La traduccion de %s es %s? (Y/N)\n", palabra, traduccion);
+
+            printf("¿La traduccion de %s es %s? (Y/N)\n ", palabra, traduccion);
             scanf(" %c", &seleccion);
-            toupper(seleccion);
+            seleccion = toupper(seleccion);
 
             while (seleccion != 'Y' && seleccion != 'N'){
-                printf("Ingrese una opcion correcta\n");
+                printf("Ingrese una opcion correcta\n ");
                 scanf(" %c", &seleccion);
-                toupper(seleccion);
+                seleccion = toupper(seleccion);
             }
+
             for (int i = 0; i < strlen(traduccion); i++){
                 if (isspace(traduccion[i])){
                     traduccion[i] = '_';
                 }
             }
-            if (idioma == ESPANOL){
-                strcpy(listado[puntero+1].espanol, palabra);
-                strcpy(listado[puntero+1].ingles, traduccion);
-                listado[puntero+1].cant_busquedas = 0;
-            }else{
-                strcpy(listado[puntero+1].ingles, palabra);
-                strcpy(listado[puntero+1].espanol, traduccion);
-                listado[puntero+1].cant_busquedas = 0;
+
+            if (seleccion == 'Y'){
+                if (idioma == ESPANOL){
+                    strcpy(listado[puntero].espanol, palabra);
+                    strcpy(listado[puntero].ingles, traduccion);
+                    listado[puntero].cant_busquedas = 0;
+                }else{
+                    strcpy(listado[puntero].ingles, palabra);
+                    strcpy(listado[puntero].espanol, traduccion);
+                    listado[puntero].cant_busquedas = 0;
+                }
+                printf("Palabra agregada con exito!\n ");
+                puntero++;
             }
         }
-        printf("Palabra agregada con exito!\n");
-    }else{
-        printf("Se alcanzo el tope del diccionario, no se pueden agregar mas palabras!\n");  
+    }else if(puntero>=LONGITUD_LISTA){
+        printf("Se alcanzo el tope del diccionario, no se pueden agregar mas palabras!\n ");
+    }else if(BUSCAR(palabra, listado, puntero, idioma)>=0){
+        printf("La palabra buscada ya existe!\n ");
     }
-    return puntero+1;
+    return puntero;
 };
 
 
@@ -263,33 +269,33 @@ int TRADUCIR(diccionario listado[], int puntero, short idioma){
     char seleccion;
     char palabra[LONGITUD_PALABRA];
 
-    printf("Ingrese la palabra a traducir\n");
+    printf(" Ingrese la palabra a traducir\n ");
 
     fflush(stdin);  //Limpia la entrada de datos, sierve para que funcione bien el gets
     gets(palabra);  //Permite escribir con espacios
-    palabra[0] = toupper(palabra[0]);   //Agrego mayus
 
     i = BUSCAR(palabra, listado, puntero, idioma);
 
-    if(i>=0){
+    if (i>=0){
         listado[i].cant_busquedas = listado[i].cant_busquedas + 1;
-        printf("La traduccion de %c%s%c es ", '"', palabra,'"');
+        printf(" La traduccion de %c%s%c es ", '"', palabra,'"');
         if(idioma == ESPANOL){
-            printf("%c%s%c\n\n", '"', listado[i].ingles, '"');
+            printf("%c%s%c\n\n ", '"', listado[i].ingles, '"');
         }else{
-            printf("%c%s%c\n\n", '"', listado[i].espanol, '"');
+            printf("%c%s%c\n\n ", '"', listado[i].espanol, '"');
         }
     }else{
-        printf("Palabra no encontrada, Â¿Desea agregarla al diccionario? (Y/N)\n");
+        printf(" Palabra no encontrada, ¿Desea agregarla al diccionario? (Y/N)\n ");
         scanf(" %c", &seleccion);
         seleccion = toupper(seleccion);
         while (seleccion != 'Y' && seleccion != 'N'){
-            printf("Seleccione una opcion correcta!\n");
+            printf("Seleccione una opcion correcta!\n ");
             scanf(" %c", &seleccion);
             seleccion = toupper(seleccion);
         }
         if (seleccion == 'Y'){
             puntero = AGREGAR(palabra, listado, puntero, idioma);
+            ORDENAR_ALFABETICAMENTE(listado, puntero);
         }
     }
     return puntero;
@@ -309,16 +315,17 @@ short SUBMENU(diccionario listado[], int puntero, short idioma){
     char seleccion2 = 'Y';
     char palabra[LONGITUD_PALABRA];
     short retorno;
+    printf("-----------------------------------------------------------------------\n");
     if(idioma == INGLES){
-        printf("\t\tINGLES A ESPAÃ‘OL\n");
+        printf("\t  INGLES A ESPAÑOL\n");
     }else{
-        printf("\t\tESPAÃ‘OL A INGLES\n");
+        printf("\t  ESPAÑOL A INGLES\n");
     }
-    printf(" T - Traducir\n A - Agregar palabra \n M - Mas buscadas \n V - Volver\n");
+    printf(" T - Traducir\n A - Agregar palabra \n M - Mas buscadas \n V - Volver\n ");
     scanf(" %c", &seleccion);
     seleccion = toupper(seleccion);
     while(seleccion != 'T' && seleccion != 'A' && seleccion != 'M' && seleccion != 'V'){
-        printf("Ingrese una opcion correcta!\n");
+        printf("Ingrese una opcion correcta!\n ");
         scanf(" %c", &seleccion);
         seleccion = toupper(seleccion);
     }
@@ -328,21 +335,19 @@ short SUBMENU(diccionario listado[], int puntero, short idioma){
         puntero = TRADUCIR(listado, puntero, idioma);
         retorno = 1;
         break;
-    
+
     case 'A':
         while (seleccion2 == 'Y'){
-            printf("Ingrese la palabra a agregar\n");
+            printf("Ingrese la palabra a agregar\n ");
             scanf(" %s", palabra);
-            if(BUSCAR(palabra, listado, puntero, idioma)>=0){
-                printf("La palabra buscada ya existe!\n");
-            }else{
-                puntero = AGREGAR(palabra, listado, puntero, idioma);
-            }
-            printf("Â¿Desea agregar otra palabra distinta? (Y/N)");
+            puntero = AGREGAR(palabra, listado, puntero, idioma);
+            printf("¿Desea agregar otra palabra distinta? (Y/N)\n ");
+
             scanf(" %c", &seleccion2);
             seleccion2 = toupper(seleccion2);
+
             while (seleccion2 != 'Y' && seleccion2 != 'N'){
-                printf("Seleccione una opcion correcta!\n");
+                printf("Seleccione una opcion correcta!\n ");
                 scanf(" %c", &seleccion2);
                 seleccion2 = toupper(seleccion2);
             }
@@ -378,10 +383,12 @@ short SUBMENU(diccionario listado[], int puntero, short idioma){
 short MENU(diccionario listado[], int puntero){
     short flag;
     int seleccion;
-    printf("\t\tMENU\n 1 - Ingles a espaÃ±ol\n 2 - EspaÃ±ol a ingles\n 0 - Volver\n");
+    printf("-----------------------------------------------------------------------\n");
+    printf("\t\tMENU\n 1 - Ingles a español\n 2 - Español a ingles\n 0 - Volver\n ");
     scanf(" %d", &seleccion);
     while(seleccion<0 || seleccion>3){
-        printf("Ingrese un valor correcto!\n");
+        printf("Ingrese un valor correcto!\n ");
+        fflush(stdin);
         scanf(" %d", &seleccion);
     }
     switch (seleccion){
@@ -389,7 +396,7 @@ short MENU(diccionario listado[], int puntero){
         while(SUBMENU(listado, puntero, INGLES));//Ingles a español//
         flag = 1;
         break;
-    
+
     case 2:
         while(SUBMENU(listado, puntero, ESPANOL));//Español a ingles//
         flag = 1;
@@ -399,13 +406,11 @@ short MENU(diccionario listado[], int puntero){
         //Volver//
         flag = 0;
         break;
-    
+
     default:
         break;
     }
     return flag;
 };
-
-
 #endif
 //********************************************************************************
