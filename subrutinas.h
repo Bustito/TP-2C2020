@@ -8,7 +8,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <locale.h>
-
 //DEFINICIONES********************************************************************
 
 
@@ -18,8 +17,6 @@
 #define INGLES      0
 #define DICOTOMICA  1
 #define SECUENCIAL  0
-
-
 //ESTRUCTURA DE DATOS*************************************************************
 
 
@@ -36,7 +33,6 @@ typedef struct diccionario{
 }diccionario;
 
 diccionario listado[LONGITUD_LISTA];
-
 //FUNCIONES/SUBRUTINAS************************************************************
 
 
@@ -56,9 +52,13 @@ int INICIAR(diccionario listado[]){
 
     while (!feof(diccionario)){
         fscanf(diccionario, "%s\t%s\t%d", listado[puntero].espanol, listado[puntero].ingles, &listado[puntero].cant_busquedas);
-        puntero++;
-    }
 
+        if (strcmp(listado[puntero].espanol, "\0") == 0){
+            fscanf(diccionario, "%s\t%s\t%d", listado[puntero].espanol, listado[puntero].ingles, &listado[puntero].cant_busquedas);
+        }else{
+            puntero++;
+        }
+    }
     fclose(diccionario);
     return puntero;
 };
@@ -74,10 +74,77 @@ int INICIAR(diccionario listado[]){
 void FINALIZAR(diccionario listado[], int puntero){
     FILE *diccionario;
     diccionario = fopen("espaingl.dat","w");
-    for (int i = 0; i<(puntero-1); i++){
+    for (int i = 0; i<=puntero; i++){
         fprintf(diccionario, "%s %s %d\n", listado[i].espanol, listado[i].ingles, listado[i].cant_busquedas);
     }
     fclose(diccionario);
+};
+
+
+/*********************************************************************************
+ * Funcion COMPARAR_FORMATEADO(palabra1, palabra2)                               *
+ *                                                                               *
+ *  Compara dos strings que contengan caracteres acentuados y/o caracteres       *
+ *  que sean espacios. Devuelve la comparacion de las palabras sin acentos ni    *
+ *  espacios.                                                                    *
+ *                                                                               *
+ *********************************************************************************/
+int COMPARAR_FORMATEADO(char palabra1[], char palabra2[]){
+    char aux1[LONGITUD_PALABRA];
+    char aux2[LONGITUD_PALABRA];
+
+    strcpy(aux1, palabra1);
+    strcpy(aux2, palabra2);
+
+    for (int i = 0; i<LONGITUD_PALABRA; i++){
+            switch (aux1[i]){
+                case 'á':
+                    aux1[i] = 'a';
+                    break;
+                case 'é':
+                    aux1[i] = 'e';
+                    break;
+                case 'í':
+                    aux1[i] = 'i';
+                    break;
+                case 'ó':
+                    aux1[i] = 'o';
+                    break;
+                case 'ú':
+                    aux1[i] = 'u';
+                    break;
+                case ' ':
+                    aux1[i] = '_';
+                    break;
+                default:
+                    break;
+            }
+            switch (aux2[i]){
+                case 'á':
+                    aux2[i] = 'a';
+                    break;
+                case 'é':
+                    aux2[i] = 'e';
+                    break;
+                case 'í':
+                    aux2[i] = 'i';
+                    break;
+                case 'ó':
+                    aux2[i] = 'o';
+                    break;
+                case 'ú':
+                    aux2[i] = 'u';
+                    break;
+                case ' ':
+                    aux1[i] = '_';
+                    break;
+                default:
+                    break;
+            }
+    }
+
+    printf("%s\t%s\n", aux1, aux2);
+    return strcmp(aux1,aux2);
 };
 
 
@@ -94,36 +161,26 @@ int BUSCAR(char palabra[], diccionario listado[], int puntero, short idioma){
     int i = 0;
     int min = 0;
     int max = puntero;
-
-    char busqueda[LONGITUD_PALABRA];
-    strcpy(busqueda, palabra);
-
-    for (int i = 0; i < strlen(busqueda); i++){
-        if (isspace(busqueda[i])){
-            busqueda[i] = '_';
-        }
-    }
-
     if (idioma == INGLES){
-        while(i<puntero && strcmp(busqueda, listado[i].ingles) != 0){
+        while(i<puntero && COMPARAR_FORMATEADO(palabra, listado[i].ingles) != 0){
             i++;
         }
-        if (strcmp(busqueda, listado[i].ingles)==0){
+        if (COMPARAR_FORMATEADO(palabra, listado[i].ingles)==0){
             posicion = i;
         }else{
             posicion = -1;
         }
     }else{
         i = (min+max)/2;
-        while(min<max && strcmp(busqueda, listado[i].espanol) != 0){
-            if(strcmp(busqueda, listado[i].espanol)<0){
+        while(min<max && COMPARAR_FORMATEADO(palabra, listado[i].espanol)!=0){
+            if(COMPARAR_FORMATEADO(palabra, listado[i].espanol)<0){
                 max = i-1;
             }else{
                 min = i+1;
             }
             i = (min+max)/2;
         }
-        if (strcmp(busqueda, listado[i].espanol)==0){
+        if (COMPARAR_FORMATEADO(palabra, listado[i].espanol)==0){
             posicion = i;
         }else{
             posicion = -1;
@@ -147,9 +204,9 @@ void ORDENAR_ALFABETICAMENTE(diccionario listado[], int puntero){
         aux = listado[i];
         j = i-1;
         flag = 1;
-        while (flag && j>=0){
 
-            if (strcmp(aux.espanol, listado[j].espanol)<0){
+        while (flag && j>=0){
+            if (COMPARAR_FORMATEADO(aux.espanol, listado[j].espanol)<0){
                 listado[j+1] = listado[j];
                 j--;
             }else{
@@ -158,6 +215,10 @@ void ORDENAR_ALFABETICAMENTE(diccionario listado[], int puntero){
         }
         listado[j+1] = aux;
     }
+    for (int i = 0; i < puntero; i++){
+        printf("%s\t%s\t%d\n", listado[i].espanol, listado[i].ingles, listado[i].cant_busquedas);
+    }
+
 };
 
 
@@ -205,13 +266,16 @@ void MAS_BUSCADAS(diccionario listado[], int puntero){
 int AGREGAR(char palabra[], diccionario listado[], int puntero, short idioma){
     char traduccion[LONGITUD_PALABRA];
     char seleccion = 'N';
+
     if(puntero<LONGITUD_LISTA && BUSCAR(palabra, listado, puntero, idioma)<0){
         while (seleccion == 'N'){
+
             if (idioma == ESPANOL){
                 printf("Ingresar la traduccion al ingles\n ");
             }else{
                 printf("Ingresar la traduccion al español\n ");
             }
+
             fflush(stdin);
             gets(traduccion);
 
@@ -228,6 +292,12 @@ int AGREGAR(char palabra[], diccionario listado[], int puntero, short idioma){
             for (int i = 0; i < strlen(traduccion); i++){
                 if (isspace(traduccion[i])){
                     traduccion[i] = '_';
+                }
+            }
+
+            for (int i = 0; i < strlen(palabra); i++){
+                if (isspace(palabra[i])){
+                    palabra[i] = '_';
                 }
             }
 
@@ -265,7 +335,6 @@ int AGREGAR(char palabra[], diccionario listado[], int puntero, short idioma){
  *********************************************************************************/
 int TRADUCIR(diccionario listado[], int puntero, short idioma){
     int i = 0;
-    int ant;
     char seleccion;
     char palabra[LONGITUD_PALABRA];
 
@@ -339,7 +408,10 @@ short SUBMENU(diccionario listado[], int puntero, short idioma){
     case 'A':
         while (seleccion2 == 'Y'){
             printf("Ingrese la palabra a agregar\n ");
-            scanf(" %s", palabra);
+
+            fflush(stdin);
+            gets(palabra);
+
             puntero = AGREGAR(palabra, listado, puntero, idioma);
             printf("¿Desea agregar otra palabra distinta? (Y/N)\n ");
 
@@ -393,12 +465,12 @@ short MENU(diccionario listado[], int puntero){
     }
     switch (seleccion){
     case 1:
-        while(SUBMENU(listado, puntero, INGLES));//Ingles a español//
+        while(SUBMENU(listado, puntero, INGLES));
         flag = 1;
         break;
 
     case 2:
-        while(SUBMENU(listado, puntero, ESPANOL));//Español a ingles//
+        while(SUBMENU(listado, puntero, ESPANOL));
         flag = 1;
         break;
 

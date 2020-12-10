@@ -2,7 +2,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <locale.h>
-
 #include "subrutinas.h"
 
 int main (void){
