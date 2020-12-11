@@ -2,12 +2,13 @@
 #include <string.h>
 #include <ctype.h>
 #include <locale.h>
-#include "subrutinas.h"
-/*
+
 #define LONGITUD_LISTA      10000
 #define LONGITUD_PALABRA    20
 #define ESPANOL     1
 #define INGLES      0
+#define DICOTOMICA  1
+#define SECUENCIAL  0
 
 typedef struct diccionario{
     char espanol[LONGITUD_PALABRA];
@@ -16,6 +17,10 @@ typedef struct diccionario{
 }diccionario;
 
 diccionario listado[LONGITUD_LISTA];
+
+int puntero;
+
+//FUNCIONES/SUBRUTINAS************************************************************
 
 int INICIAR(diccionario listado[]){
     setlocale(LC_ALL, "");
@@ -346,9 +351,8 @@ short MENU(diccionario listado[], int puntero){
     }
     return flag;
 };
-*/
+
 int main (void){
-    int puntero;
     puntero = INICIAR(listado);
     while (MENU(listado, puntero));
     FINALIZAR(listado, puntero);
